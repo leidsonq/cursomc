@@ -9,10 +9,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import o.q.leidson.cursomc.domain.Categoria;
 import o.q.leidson.cursomc.domain.Cidade;
+import o.q.leidson.cursomc.domain.Cliente;
+import o.q.leidson.cursomc.domain.Endereco;
 import o.q.leidson.cursomc.domain.Estado;
 import o.q.leidson.cursomc.domain.Produto;
+import o.q.leidson.cursomc.domain.enums.TipoCliente;
 import o.q.leidson.cursomc.repositories.CategoriaRepository;
 import o.q.leidson.cursomc.repositories.CidadeRepository;
+import o.q.leidson.cursomc.repositories.ClienteRepository;
+import o.q.leidson.cursomc.repositories.EnderecoRepository;
 import o.q.leidson.cursomc.repositories.EstadoRepository;
 import o.q.leidson.cursomc.repositories.ProdutoRepository;
 
@@ -27,6 +32,10 @@ public class CursomcApplication implements CommandLineRunner {
 	private EstadoRepository estadoRepository;
 	@Autowired
 	private CidadeRepository cidadeRepository;
+	@Autowired
+	private EnderecoRepository enderecoRepository;
+	@Autowired
+	private ClienteRepository clienteRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(CursomcApplication.class, args);
@@ -64,6 +73,17 @@ public class CursomcApplication implements CommandLineRunner {
 		
 		estadoRepository.saveAll(Arrays.asList(est1, est2));
 		cidadeRepository.saveAll(Arrays.asList(c1, c2, c3));
+		
+		Cliente cli1 = new Cliente(null, "Maria", "maria@gmail.com", "088757373755", TipoCliente.PESSOAFISCA);
+		cli1.getTelefones().addAll(Arrays.asList("99967785","67899898"));
+		
+		Endereco e1 = new Endereco (null, "Rua Dep. Sinval Bambirra", "296A", "Casa", "CDI2", "35701-379", cli1, c1);
+		Endereco e2 = new Endereco (null, "Bambirra", "555", "Casa", "CDI", "35701-434", cli1, c2);
+		
+		cli1.getEnderecos().addAll(Arrays.asList(e1, e2));
+		
+		clienteRepository.saveAll(Arrays.asList(cli1));
+		enderecoRepository.saveAll(Arrays.asList(e1, e2));
 		
 	}
 
