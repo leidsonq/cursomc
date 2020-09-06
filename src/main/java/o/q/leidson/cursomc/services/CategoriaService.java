@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import o.q.leidson.cursomc.domain.Categoria;
+import o.q.leidson.cursomc.dto.CategoriaDTO;
 import o.q.leidson.cursomc.repositories.CategoriaRepository;
 import o.q.leidson.cursomc.services.exceptions.DataIntegrityException;
 import o.q.leidson.cursomc.services.exceptions.ObjectNotFoundException;
@@ -33,31 +34,34 @@ public class CategoriaService {
 	}
 
 	public Categoria update(Categoria obj) {
-		//chama o método find e lança uma exceção caso o id não existaf
+		// chama o método find e lança uma exceção caso o id não existaf
 		find(obj.getId());
 		return repo.save(obj);
 	}
-	
-	public void delete (Integer id) {
+
+	public void delete(Integer id) {
 		find(id);
 		try {
-		repo.deleteById(id);
-		}catch (DataIntegrityViolationException e) {
+			repo.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityException("Não é possível excluir uma categoria que possui componentes");
-			
+
 		}
 	}
-	
-	public List<Categoria> findAll(){
+
+	public List<Categoria> findAll() {
 		return repo.findAll();
 	}
-	
-	public Page <Categoria> findPage (Integer page, Integer linesPerPage, String orderBy, String direction){
-		
-		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction),
-				orderBy);
+
+	public Page<Categoria> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
+
+		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		return repo.findAll(pageRequest);
-		
+
+	}
+
+	public Categoria fromDTO(CategoriaDTO objDto) {
+		return new Categoria(objDto.getId(), objDto.getNome());
 	}
 
 }
