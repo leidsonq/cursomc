@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import o.q.leidson.cursomc.domain.Categoria;
+import o.q.leidson.cursomc.domain.Cliente;
 import o.q.leidson.cursomc.dto.CategoriaDTO;
 import o.q.leidson.cursomc.repositories.CategoriaRepository;
 import o.q.leidson.cursomc.services.exceptions.DataIntegrityException;
@@ -34,9 +35,9 @@ public class CategoriaService {
 	}
 
 	public Categoria update(Categoria obj) {
-		// chama o método find e lança uma exceção caso o id não existaf
-		find(obj.getId());
-		return repo.save(obj);
+		Categoria newObj = find(obj.getId());
+		updateData (newObj, obj);
+		return repo.save(newObj);
 	}
 
 	public void delete(Integer id) {
@@ -62,6 +63,10 @@ public class CategoriaService {
 
 	public Categoria fromDTO(CategoriaDTO objDto) {
 		return new Categoria(objDto.getId(), objDto.getNome());
+	}
+	
+	private void updateData (Categoria newObj, Categoria obj) {
+		newObj.setNome(obj.getNome());
 	}
 
 }
