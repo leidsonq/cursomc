@@ -35,10 +35,14 @@ public class CategoriaResource {
 
 	}
 
+	//Recebe uma Categoria no formato Json e a insere no banco de dados
 	@RequestMapping(method = RequestMethod.POST)
+	//@RequestBody - anotação que faz o objeto Json ser convertido em objeto Java 
 	public ResponseEntity<Void> insert(@Valid @RequestBody CategoriaDTO objDto) {
+		//Chama um serviço que insere a Categoria no banco de dados
 		Categoria obj = service.fromDTO(objDto);
 		obj = service.insert(obj);
+		//Retorna um código http - ver no google: http status code
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}

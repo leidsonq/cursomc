@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import o.q.leidson.cursomc.domain.Produto;
-import o.q.leidson.cursomc.dto.CategoriaDTO;
 import o.q.leidson.cursomc.dto.ProdutoDTO;
 import o.q.leidson.cursomc.resources.util.URL;
 import o.q.leidson.cursomc.services.ProdutoService;
