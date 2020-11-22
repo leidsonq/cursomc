@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import o.q.leidson.cursomc.domain.Categoria;
 import o.q.leidson.cursomc.domain.Pedido;
 import o.q.leidson.cursomc.services.PedidoService;
 
