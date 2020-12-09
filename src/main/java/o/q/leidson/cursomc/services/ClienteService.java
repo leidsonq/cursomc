@@ -1,11 +1,13 @@
 package o.q.leidson.cursomc.services;
 
+import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,38 +35,44 @@ public class ClienteService {
 
 	@Autowired
 	private ClienteRepository repo;
-	
+
 	@Autowired
 	private EnderecoRepository endeRepository;
-	
+
 	@Autowired
 	BCryptPasswordEncoder pe;
-	
+
 	@Autowired
 	private S3Service s3Service;
 
+	@Autowired
+	private ImageService imageService;
+
+	@Value("${img.prefix.client.profile}")
+	private String prefix;
+
 	public Cliente find(Integer id) {
-		
+
 		UserSS user = UserService.authenticated();
-		if (user==null || !user.hasRole(Perfil.ADMIN) && !id.equals(user.getId())) {
+		if (user == null || !user.hasRole(Perfil.ADMIN) && !id.equals(user.getId())) {
 			throw new AuthorizationException("Acesso negado");
 		}
-		
+
 		Optional<Cliente> obj = repo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));
 	}
-	
+
 	public Cliente insert(Cliente obj) {
 		obj.setId(null);
 		obj = repo.save(obj);
 		endeRepository.saveAll(obj.getEnderecos());
 		return obj;
 	}
-	
+
 	public Cliente update(Cliente obj) {
 		Cliente newObj = find(obj.getId());
-		updateData (newObj, obj);
+		updateData(newObj, obj);
 		return repo.save(newObj);
 	}
 
@@ -91,11 +99,13 @@ public class ClienteService {
 	public Cliente fromDTO(ClienteDTO objDto) {
 		return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail(), null, null, null);
 	}
-	
+
 	public Cliente fromDTO(ClienteNewDTO objDto) {
-		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfOuCnpj(), TipoCliente.toEnum(objDto.getTipo()), pe.encode(objDto.getSenha()));
+		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfOuCnpj(),
+				TipoCliente.toEnum(objDto.getTipo()), pe.encode(objDto.getSenha()));
 		Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
-		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(), objDto.getBairro(), objDto.getCep(), cli, cid);
+		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(),
+				objDto.getBairro(), objDto.getCep(), cli, cid);
 		cli.getTelefones().add(objDto.getTelefone1());
 		cli.setEnderecos(Arrays.asList(end));
 		if (objDto.getTelefone2() != null) {
@@ -104,29 +114,26 @@ public class ClienteService {
 		if (objDto.getTelefone3() != null) {
 			cli.getTelefones().add(objDto.getTelefone3());
 		}
-		
+
 		return cli;
 	}
-	
-	private void updateData (Cliente newObj, Cliente obj) {
+
+	private void updateData(Cliente newObj, Cliente obj) {
 		newObj.setNome(obj.getNome());
 		newObj.setEmail(obj.getEmail());
 	}
-	
+
 	public URI uploadProfilePicture(MultipartFile multipartFile) {
-		
+
 		UserSS user = UserService.authenticated();
 		if (user == null) {
 			throw new AuthorizationException("Acesso negado");
 		}
 
-		URI uri = s3Service.uploadFile(multipartFile);
+		BufferedImage jpgImage = imageService.getJpgImageFromFile(multipartFile);
+		String fileName = prefix + user.getId() + ".jpg";
+		return s3Service.uploadFile(imageService.getInputStream(jpgImage, "jpg"), fileName, "image");
 
-		Cliente cli = find(user.getId());
-		cli.setImageUrl(uri.toString());
-		repo.save(cli);
-
-		return uri;
 	}
 
 }
